@@ -2,25 +2,130 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/Layout";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { FirstLoginFlow } from "@/components/auth/FirstLoginFlow";
+
+// Dashboard Components
+import { AdminDashboard } from "@/pages/admin/Dashboard";
+import { SchoolDashboard } from "@/pages/school/Dashboard";
+import { TeacherDashboard } from "@/pages/teacher/Dashboard";
+import { StudentDashboard } from "@/pages/student/Dashboard";
+
+// Additional Pages (placeholders for now)
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginForm />;
+  }
+
+  // Check if student needs to complete first login
+  if (user.role === 'student' && user.isFirstLogin && !user.profileCompleted) {
+    return <FirstLoginFlow />;
+  }
+
+  return <>{children}</>;
+};
+
+// Route Guard for Role-based Access
+const RoleRoute = ({ allowedRoles, children }: { allowedRoles: string[]; children: React.ReactNode }) => {
+  const { user } = useAuth();
+
+  if (!user || !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const AppRoutes = () => {
+  const { user } = useAuth();
+
+  // Redirect to appropriate dashboard based on role
+  const getDefaultRoute = () => {
+    if (!user) return '/';
+    switch (user.role) {
+      case 'admin': return '/admin/dashboard';
+      case 'school': return '/school/dashboard';
+      case 'teacher': return '/teacher/dashboard';
+      case 'student':
+      case 'parent': return '/student/dashboard';
+      default: return '/';
+    }
+  };
+
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/dashboard" element={
+        <RoleRoute allowedRoles={['admin']}>
+          <AdminDashboard />
+        </RoleRoute>
+      } />
+      
+      {/* School Routes */}
+      <Route path="/school/dashboard" element={
+        <RoleRoute allowedRoles={['school']}>
+          <SchoolDashboard />
+        </RoleRoute>
+      } />
+      
+      {/* Teacher Routes */}
+      <Route path="/teacher/dashboard" element={
+        <RoleRoute allowedRoles={['teacher']}>
+          <TeacherDashboard />
+        </RoleRoute>
+      } />
+      
+      {/* Student/Parent Routes */}
+      <Route path="/student/dashboard" element={
+        <RoleRoute allowedRoles={['student', 'parent']}>
+          <StudentDashboard />
+        </RoleRoute>
+      } />
+      
+      {/* Catch-all */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ProtectedRoute>
+            <Layout>
+              <AppRoutes />
+            </Layout>
+          </ProtectedRoute>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
