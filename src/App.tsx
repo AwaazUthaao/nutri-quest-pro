@@ -10,11 +10,17 @@ import { FirstLoginFlow } from "@/components/auth/FirstLoginFlow";
 
 // Dashboard Components
 import { AdminDashboard } from "@/pages/admin/Dashboard";
+import { AdminSchools } from "@/pages/admin/Schools";
+import { AdminContent } from "@/pages/admin/Content";
+import { AdminSettings } from "@/pages/admin/Settings";
 import { SchoolDashboard } from "@/pages/school/Dashboard";
+import { SchoolStudents } from "@/pages/school/Students";
 import { TeacherDashboard } from "@/pages/teacher/Dashboard";
 import { StudentDashboard } from "@/pages/student/Dashboard";
+import { StudentLunch } from "@/pages/student/Lunch";
+import { StudentAchievements } from "@/pages/student/Achievements";
 
-// Additional Pages (placeholders for now)
+// Additional Pages
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,17 +91,17 @@ const AppRoutes = () => {
       } />
       <Route path="/admin/schools" element={
         <RoleRoute allowedRoles={['admin']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Schools Management</h1><p>Coming soon...</p></div>
+          <AdminSchools />
         </RoleRoute>
       } />
       <Route path="/admin/content" element={
         <RoleRoute allowedRoles={['admin']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Content Management</h1><p>Coming soon...</p></div>
+          <AdminContent />
         </RoleRoute>
       } />
       <Route path="/admin/settings" element={
         <RoleRoute allowedRoles={['admin']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Settings</h1><p>Coming soon...</p></div>
+          <AdminSettings />
         </RoleRoute>
       } />
       
@@ -107,7 +113,7 @@ const AppRoutes = () => {
       } />
       <Route path="/school/students" element={
         <RoleRoute allowedRoles={['school']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Students Management</h1><p>Coming soon...</p></div>
+          <SchoolStudents />
         </RoleRoute>
       } />
       <Route path="/school/teachers" element={
@@ -151,12 +157,12 @@ const AppRoutes = () => {
       } />
       <Route path="/student/lunch" element={
         <RoleRoute allowedRoles={['student', 'parent']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Lunch Plan</h1><p>Coming soon...</p></div>
+          <StudentLunch />
         </RoleRoute>
       } />
       <Route path="/student/achievements" element={
         <RoleRoute allowedRoles={['student', 'parent']}>
-          <div className="p-6"><h1 className="text-2xl font-bold">Achievements</h1><p>Coming soon...</p></div>
+          <StudentAchievements />
         </RoleRoute>
       } />
       <Route path="/student/learn" element={
