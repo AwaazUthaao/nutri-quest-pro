@@ -68,11 +68,12 @@ export const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
         <div className="absolute bottom-4 left-4 right-4">
           <div className="p-3 bg-muted rounded-lg mb-3">
             <p className="text-sm font-medium">{user?.name}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <p className="text-xs text-primary font-medium capitalize">{user?.role}</p>
           </div>
           <Button 
             variant="outline" 
-            className="w-full justify-start"
+            className="w-full justify-start hover:bg-destructive hover:text-destructive-foreground transition-smooth"
             onClick={logout}
           >
             <LogOut className="mr-3 h-4 w-4" />
